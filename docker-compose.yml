@@ -1,0 +1,90 @@
+# =============================================================================
+# Development Docker Compose
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # PHP-FPM — Symfony application runtime
+  # ---------------------------------------------------------------------------
+  php:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+      target: dev
+      args:
+        HOST_UID: ${UID:-1000}
+        HOST_GID: ${GID:-1000}
+    volumes:
+      # Application source (bind mount for live editing).
+      - ./app:/var/www/html:cached
+      # Composer cache — persists between runs.
+      - composer_cache:/tmp/composer
+    environment:
+      APP_ENV: dev
+      APP_DEBUG: "1"
+      # Symfony reads this env and overrides DATABASE_URL from app/.env.
+      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?serverVersion=16&charset=utf8"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # Allows Xdebug in the container to reach the IDE on the host.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - app
+
+  # ---------------------------------------------------------------------------
+  # Nginx — HTTP server, proxies PHP requests to FPM
+  # ---------------------------------------------------------------------------
+  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - "${NGINX_PORT:-8080}:80"
+    volumes:
+      # Application source (needed to serve static files directly).
+      - ./app:/var/www/html:cached
+      # Nginx configuration.
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - php
+    networks:
+      - app
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL — main database
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-pizza_shop}
+      POSTGRES_USER: ${POSTGRES_USER:-pizza}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pizza_secret}
+    volumes:
+      # Named volume — data survives container restarts.
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-pizza} -d ${POSTGRES_DB:-pizza_shop}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - app
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  # PostgreSQL data directory.
+  postgres_data:
+  # Composer cache directory (speeds up repeated installs).
+  composer_cache:
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  app:
+    driver: bridge
