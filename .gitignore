@@ -1,0 +1,36 @@
+# ===================
+# Symfony application
+# ===================
+/app/vendor/
+/app/var/
+/app/public/bundles/
+/app/public/uploads/
+/app/.env.local
+/app/.env.local.php
+/app/.env.*.local
+/app/phpunit.xml
+
+# ===================
+# Infrastructure env
+# ===================
+/.env
+!/.env.example
+
+# ===================
+# Docker
+# ===================
+/docker/data/
+
+# ===================
+# IDE
+# ===================
+/.idea/
+/.vscode/
+*.swp
+*.swo
+
+# ===================
+# OS
+# ===================
+.DS_Store
+Thumbs.db
