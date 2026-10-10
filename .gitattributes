@@ -18,3 +18,8 @@ Dockerfile text eol=lf
 # Windows scripts keep CRLF
 *.bat text eol=crlf
 *.cmd text eol=crlf
+
+#Что это даёт:
+#* text=auto eol=lf — все текстовые файлы всегда нормализуются в LF в репозитории.
+#Бинарные файлы помечены явно — чтобы git не пытался их конвертировать.
+#Makefile и Dockerfile — критичны для Docker, у них обязательно должен быть LF.
