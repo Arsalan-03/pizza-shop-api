@@ -1,0 +1,32 @@
+# ============================================
+# .dockerignore — what is NOT sent to docker build context
+# ============================================
+
+# --- Git metadata ---
+.git
+.gitignore
+.gitattributes
+
+# --- IDE ---
+.idea
+.vscode
+*.swp
+*.swo
+
+# --- Infra files (not needed inside the image) ---
+docker-compose.yml
+docker-compose.prod.yaml
+Makefile
+README.md
+
+# --- Local env files — MUST NEVER leak into the image ---
+**/.env.local
+**/.env.*.local
+**/.env.local.php
+
+# --- Symfony runtime artifacts (produced inside image) ---
+app/var/
+app/vendor/
+
+# --- Node (не используется, но на будущее) ---
+node_modules
