@@ -5,6 +5,10 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
+# Load .env so variable overrides (NGINX_PORT, POSTGRES_PORT, ...) are visible in Makefile.
+-include .env
+export
+
 # -----------------------------------------------------------------------------
 # Config
 # -----------------------------------------------------------------------------
