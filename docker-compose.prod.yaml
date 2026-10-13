@@ -32,9 +32,10 @@ services:
   # exclusively inside the php container.
   # ---------------------------------------------------------------------------
   nginx:
-    volumes: !override
-      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./app/public:/var/www/html/public:ro
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    volumes: !reset []
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
