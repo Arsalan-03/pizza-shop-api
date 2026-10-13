@@ -1,0 +1,47 @@
+# =============================================================================
+# Production overrides for docker-compose.yml
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yaml up -d
+#
+# Requires Docker Compose v2.24+ for the !reset / !override syntax.
+# Check with: docker compose version
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # PHP-FPM — production runtime
+  # - builds the `prod` target (no Xdebug, no dev tools)
+  # - no bind mounts: application code is baked into the image
+  # ---------------------------------------------------------------------------
+  php:
+    build:
+      target: prod
+    environment:
+      APP_ENV: prod
+      APP_DEBUG: "0"
+    # Reset dev bind mounts + composer cache: nothing from the host
+    # should shadow the code and vendor directory baked into the image.
+    volumes: !reset []
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Nginx — serve static assets and proxy PHP to FPM
+  # In dev, nginx mounts the entire ./app directory to serve static files.
+  # In prod, only ./app/public is needed (read-only); the PHP code lives
+  # exclusively inside the php container.
+  # ---------------------------------------------------------------------------
+  nginx:
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    volumes: !reset []
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL — no host port exposure in production
+  # The database is reachable only from the Docker network (by service name).
+  # ---------------------------------------------------------------------------
+  postgres:
+    ports: !reset []
+    restart: unless-stopped

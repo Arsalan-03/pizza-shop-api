@@ -1,0 +1,25 @@
+# Auto-detect text files and normalize to LF on commit
+* text=auto eol=lf
+
+# Explicitly mark binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+
+# Shell scripts must have LF
+*.sh text eol=lf
+Makefile text eol=lf
+Dockerfile text eol=lf
+
+# Windows scripts keep CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+#Что это даёт:
+#* text=auto eol=lf — все текстовые файлы всегда нормализуются в LF в репозитории.
+#Бинарные файлы помечены явно — чтобы git не пытался их конвертировать.
+#Makefile и Dockerfile — критичны для Docker, у них обязательно должен быть LF.
