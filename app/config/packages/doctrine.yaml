@@ -16,8 +16,8 @@ doctrine:
             Product:
                 type: attribute
                 is_bundle: false
-                dir: '%kernel.project_dir%/src/Product/Domain/Model/'
-                prefix: 'App\Product/Domain/Model'
+                dir: '%kernel.project_dir%/src/Product/Domain/Model'
+                prefix: 'App\Product\Domain\Model'
                 alias: Product
 
 when@test:
