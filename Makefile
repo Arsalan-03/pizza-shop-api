@@ -114,6 +114,10 @@ migrate: ## Run DB migrations
 migrate-diff: ## Generate migration from entity diff
 	@$(CONSOLE) doctrine:migrations:diff
 
+.PHONY: fixtures
+fixtures: ## Load Doctrine fixtures (dev/test)
+	@$(CONSOLE) doctrine:fixtures:load --no-interaction
+
 .PHONY: cache-clear
 cache-clear: ## Clear Symfony cache
 	@$(CONSOLE) cache:clear

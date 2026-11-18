@@ -17,8 +17,13 @@ services:
         resource: '../src/'
         exclude:
             - '../src/DependencyInjection/'
-            - '../src/Entity/'
             - '../src/Kernel.php'
+            - '../src/Product/Domain/Model/'
+            - '../src/Product/UI/Http/Request/CreateProductRequest.php'
+            - '../src/Product/UI/Http/Request/UpdateProductRequest.php'
+            - '../src/Product/UI/Http/Request/ProductRequestConstraints.php'
+            - '../src/Product/UI/Http/Response/'
+            - '../src/Shared/UI/Http/Request/'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
