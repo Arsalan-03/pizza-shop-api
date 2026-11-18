@@ -2,7 +2,7 @@
 
 Backend API для интернет-магазина пиццы и напитков.
 
-**Текущий статус:** Этап 1 — Docker-окружение (Symfony skeleton + Nginx + PostgreSQL).
+**Текущий статус:** Этап 2 — CRUD продуктов (modulith + package-by-layer).
 
 ---
 
@@ -11,7 +11,8 @@ Backend API для интернет-магазина пиццы и напитк�
 | Слой            | Технология                              |
 | --------------- | --------------------------------------- |
 | Язык            | PHP 8.4                                 |
-| Фреймворк       | Symfony 7.1                             |
+| Фреймворк       | Symfony 7.4 LTS                         |
+| ORM             | Doctrine ORM 3 + Migrations             |
 | База данных     | PostgreSQL 16                           |
 | Веб-сервер      | Nginx 1.27 (Alpine)                     |
 | Контейнеризация | Docker, Docker Compose v2.24+           |
@@ -64,6 +65,50 @@ make init
 
 > Порт можно изменить через `NGINX_PORT` в `.env`.
 
+Чтобы применить схему БД и загрузить демо-продукты:
+
+```bash
+make migrate
+make fixtures
+```
+
+---
+
+## Product API (этап 2)
+
+| Метод  | URL                         | Описание                          | Успех |
+| ------ | --------------------------- | --------------------------------- | ----- |
+| GET    | `/products?page=1&limit=20` | Список продуктов с пагинацией     | 200   |
+| GET    | `/products/{id}`            | Один продукт                      | 200   |
+| POST   | `/products`                 | Создать продукт                   | 201   |
+| PATCH  | `/products/{id}`            | Частично обновить продукт         | 200   |
+| DELETE | `/products/{id}`            | Удалить продукт                   | 204   |
+
+Примеры:
+
+```bash
+# список
+curl http://localhost:8080/products
+
+# создать (цена в копейках)
+curl -X POST http://localhost:8080/products \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"Margherita","price":45000,"weight":450,"category":"pizza","description":"Classic"}'
+
+# обновить
+curl -X PATCH http://localhost:8080/products/1 \
+  -H 'Content-Type: application/json' \
+  -d '{"price":47000}'
+
+# удалить
+curl -X DELETE http://localhost:8080/products/1
+```
+
+Пагинация: `page` 1…10000, `limit` 1…100 (по умолчанию `page=1`, `limit=20`).  
+Ошибки валидации → `422` (тело) / `400` (query), отсутствующий ресурс → `404`, ответы — JSON.
+
+Архитектура модуля `Product`: Domain / Application / Infrastructure / UI (Http).
+
 ---
 
 ## Основные команды
@@ -83,6 +128,7 @@ make init
 | `make composer CMD="…"` | Выполнить команду Composer                                  |
 | `make migrate`          | Применить Doctrine-миграции                                 |
 | `make migrate-diff`     | Сгенерировать миграцию по изменениям сущностей              |
+| `make fixtures`         | Загрузить Doctrine-фикстуры (dev/test)                      |
 | `make cache-clear`      | Очистить кэш Symfony                                        |
 | `make clean`            | Остановить контейнеры **и удалить volume** (⚠ данные БД)     |
 
@@ -167,11 +213,12 @@ PostgreSQL 16 работает в отдельном контейнере. Па�
 make sh-db
 ```
 
-Миграции (когда появятся маппинги сущностей на следующих этапах):
+Миграции и фикстуры:
 
 ```bash
 make migrate        # применить ожидающие миграции
 make migrate-diff   # сгенерировать миграцию по изменениям сущностей
+make fixtures       # загрузить демо-продукты (очищает таблицы)
 ```
 
 Данные сохраняются в named-volume `postgres_data` и выживают при `make down` / `make restart`. Чтобы стереть: `make clean` (⚠ удаляет volume).
@@ -219,9 +266,10 @@ docker compose version
 ## Roadmap
 
 - [x] **Этап 1** — Docker-окружение
-- [ ] Этап 2 — Domain model и схема БД
-- [ ] Этап 3 — REST API
+- [x] **Этап 2** — CRUD продуктов (entity, миграции, REST, валидация, фикстуры)
+- [ ] Этап 3 — Расширение домена / заказы
 - [ ] Этап 4 — Асинхронная обработка (RabbitMQ)
 - [ ] Этап 5 — Кэширование (Redis)
 - [ ] Этап 6 — Тесты
 - [ ] Этап 7 — CI/CD (GitLab)
+- [ ] Этап 11 — Swagger/OpenAPI
